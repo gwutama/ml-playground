@@ -24,6 +24,6 @@ if __name__ == '__main__':
         image_tensor = np.vstack([x])
         classes = model.predict(image_tensor)
         if classes[0] > 0.5:
-            print(image_filepath + " is a human")
+            print(image_filepath + " is a dog")
         else:
-            print(image_filepath + " is a horse")
+            print(image_filepath + " is a cat")
