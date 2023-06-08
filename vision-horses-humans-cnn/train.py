@@ -1,34 +1,18 @@
-import shutil
-import os
-import urllib.request
-import zipfile
+import common
 import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
+# Common constants
+TRAINING_DIR = 'data/images/training'
+VALIDATION_DIR = 'data/images/validation'
+NUM_EPOCHS = 15
 
-def download_extract_dataset(url, archive_dir, extract_dir, force_download=False, force_delete=True):
-    os.makedirs(archive_dir, exist_ok=True)
 
-    # Delete extract_dir if force_delete is True
-    if force_delete and os.path.isdir(extract_dir):
-        shutil.rmtree(extract_dir)
-
-    os.makedirs(extract_dir, exist_ok=True)
-
-    # Download file if force_download is True or file does not exist
-    # Get filename from url
-    filename = os.path.join(archive_dir, url.split('/')[-1])
-
-    if force_download or not os.path.isfile(filename):
-        urllib.request.urlretrieve(url, filename)
-
-    # extract zip file
-    if filename.endswith('.zip'):
-        zip_ref = zipfile.ZipFile(filename, 'r')
-        zip_ref.extractall(extract_dir)
-        zip_ref.close()
-    else:
-        print('Not a zip file. Skipping %s...'.format(filename))
+def download_dataset():
+    common.download_extract_dataset(url='https://storage.googleapis.com/download.tensorflow.org/data/horse-or-human.zip',
+                                    extract_dir=TRAINING_DIR)
+    common.download_extract_dataset(url='https://storage.googleapis.com/download.tensorflow.org/data/validation-horse-or-human.zip',
+                                    extract_dir=VALIDATION_DIR)
 
 
 def prepare_dataset(training_dir, validation_dir):
@@ -64,22 +48,18 @@ def build_compile_model():
         tf.keras.layers.Dense(512, activation='relu'),
         tf.keras.layers.Dense(1, activation='sigmoid')
     ])
-    model.compile(loss='binary_crossentropy', optimizer=tf.keras.optimizers.RMSprop(lr=0.001), metrics=['accuracy'])
+
+    model.compile(loss='binary_crossentropy',
+                  optimizer=tf.keras.optimizers.RMSprop(learning_rate=0.001),
+                  metrics=['accuracy'])
+
     return model
 
 
 if __name__ == '__main__':
-    download_extract_dataset(url='https://storage.googleapis.com/download.tensorflow.org/data/horse-or-human.zip',
-                             archive_dir='data/archive',
-                             extract_dir='data/images/training',
-                             force_delete=True)
-    download_extract_dataset(url='https://storage.googleapis.com/download.tensorflow.org/data/validation-horse-or-human.zip',
-                             archive_dir='data/archive',
-                             extract_dir='data/images/validation',
-                             force_delete=True)
-    train_generator, validation_generator = prepare_dataset('data/images/training', 'data/images/validation')
-
+    download_dataset()
+    train_generator, validation_generator = prepare_dataset(TRAINING_DIR, VALIDATION_DIR)
     model = build_compile_model()
-    model.fit(train_generator, epochs=15)
+    model.fit(train_generator, epochs=NUM_EPOCHS, validation_data=validation_generator)
     model.summary()
     model.save('model.tf')
