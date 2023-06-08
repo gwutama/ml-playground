@@ -17,7 +17,15 @@ def download_dataset():
 
 def prepare_dataset(training_dir, validation_dir):
     # All images will be rescaled by 1./255
-    train_datagen = ImageDataGenerator(rescale=1./255)
+    train_datagen = ImageDataGenerator(
+        rescale=1./255,
+        rotation_range=40,
+        width_shift_range=0.2,
+        height_shift_range=0.2,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True,
+        fill_mode='nearest')
     train_generator = train_datagen.flow_from_directory(
         training_dir,
         target_size=(300, 300),
