@@ -14,7 +14,7 @@ if __name__ == '__main__':
     images_filepaths = args.images
 
     # load the model
-    model = tf.keras.models.load_model('horse-or-human.tf')
+    model = tf.keras.models.load_model('model.tf')
 
     for image_filepath in images_filepaths:
         img = keras_image.load_img(image_filepath, target_size=(300, 300))

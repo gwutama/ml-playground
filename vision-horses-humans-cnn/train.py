@@ -6,7 +6,7 @@ import tensorflow as tf
 from tensorflow.keras.preprocessing.image import ImageDataGenerator
 
 
-def download_extract_dataset(url, filename, archive_dir, extract_dir, force_download=False, force_delete=True):
+def download_extract_dataset(url, archive_dir, extract_dir, force_download=False, force_delete=True):
     os.makedirs(archive_dir, exist_ok=True)
 
     # Delete extract_dir if force_delete is True
@@ -16,6 +16,9 @@ def download_extract_dataset(url, filename, archive_dir, extract_dir, force_down
     os.makedirs(extract_dir, exist_ok=True)
 
     # Download file if force_download is True or file does not exist
+    # Get filename from url
+    filename = os.path.join(archive_dir, url.split('/')[-1])
+
     if force_download or not os.path.isfile(filename):
         urllib.request.urlretrieve(url, filename)
 
@@ -66,12 +69,14 @@ def build_compile_model():
 
 
 if __name__ == '__main__':
-    download_extract_dataset('https://storage.googleapis.com/download.tensorflow.org/data/horse-or-human.zip',
-                             'data/archive',
-                             'data/archive/horse-or-human.zip', 'data/images/training', force_delete=True)
-    download_extract_dataset('https://storage.googleapis.com/download.tensorflow.org/data/validation-horse-or-human.zip',
-                             'data/archive',
-                             'data/archive/validation-horse-or-human.zip', 'data/images/validation', force_delete=True)
+    download_extract_dataset(url='https://storage.googleapis.com/download.tensorflow.org/data/horse-or-human.zip',
+                             archive_dir='data/archive',
+                             extract_dir='data/images/training',
+                             force_delete=True)
+    download_extract_dataset(url='https://storage.googleapis.com/download.tensorflow.org/data/validation-horse-or-human.zip',
+                             archive_dir='data/archive',
+                             extract_dir='data/images/validation',
+                             force_delete=True)
     train_generator, validation_generator = prepare_dataset('data/images/training', 'data/images/validation')
 
     model = build_compile_model()
